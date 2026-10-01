@@ -3,7 +3,8 @@ import {
   buildCounterfactualTree,
   waterBranch,
   pruneBranch,
-  harvestSpecimen
+  harvestSpecimen,
+  removeSpecimen
 } from '../core/tree-engine';
 import { TreeEnginePort } from '../ports/tree-engine.port';
 
@@ -22,5 +23,9 @@ export class TreeEngineAdapter implements TreeEnginePort {
 
   harvest(tree: CounterfactualTree, nodeId: string): LifeSpecimen {
     return harvestSpecimen(tree, nodeId);
+  }
+
+  removeSpecimen(tree: CounterfactualTree, specimenId: string): CounterfactualTree {
+    return removeSpecimen(tree, specimenId);
   }
 }

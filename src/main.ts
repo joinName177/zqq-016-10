@@ -20,17 +20,29 @@ let isCabinetOpen = false;
 const rootEl = document.getElementById('app')!;
 
 function refreshView() {
-  const specimens = specimenAdapter.getAll();
-
+  // 整页只从 currentTree 这一个快照取数：标题、节点、展柜天然同源，
+  // 切换假设时不会出现旧树路径短暂混入新树的中间态。
   renderTreeApp(
     rootEl,
     currentTree,
-    specimens,
     isCabinetOpen,
     PRESETS,
     {
       onGrowNewTree: (assumption: string) => {
-        currentTree = treeAdapter.createTree(assumption);
+        const trimmed = assumption.trim();
+        if (!trimmed) return;
+
+        // 先在新对象上完整构建，构建成功后才一次性提交到 currentTree；
+        // 一旦构建抛错（空假设 / 引擎失败），直接保留原树，不做任何半切换渲染。
+        let nextTree: CounterfactualTree;
+        try {
+          nextTree = treeAdapter.createTree(trimmed);
+        } catch (err) {
+          alert(err instanceof Error ? err.message : '反事实树生长失败，已为你保留当前时空谱系。');
+          return;
+        }
+
+        currentTree = nextTree;
         refreshView();
       },
       onWaterNode: (nodeId: string) => {
@@ -48,7 +60,9 @@ function refreshView() {
         refreshView();
       },
       onDeleteSpecimen: (id: string) => {
+        // 树内展柜与持久化档案同步移除，避免两个数据源分叉。
         specimenAdapter.remove(id);
+        currentTree = treeAdapter.removeSpecimen(currentTree, id);
         refreshView();
       },
       onToggleCabinet: (open: boolean) => {

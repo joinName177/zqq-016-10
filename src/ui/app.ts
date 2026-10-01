@@ -1,4 +1,4 @@
-import { CounterfactualTree, LifeSpecimen, LifeNode } from '../core/models';
+import { CounterfactualTree, LifeNode } from '../core/models';
 
 export interface TreeUIHandlers {
   onGrowNewTree: (assumption: string) => void;
@@ -12,13 +12,15 @@ export interface TreeUIHandlers {
 export function renderTreeApp(
   container: HTMLElement,
   tree: CounterfactualTree,
-  specimens: LifeSpecimen[],
   isCabinetOpen: boolean,
   presets: string[],
   handlers: TreeUIHandlers
 ) {
   const esc = (s: string) =>
     s.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
+
+  // 标题、节点、展柜必须来自同一棵树的单一快照，杜绝切换假设时新旧内容混排。
+  const specimens = tree.specimens;
 
   // Organize nodes by layer index (0 to 4)
   const layers: LifeNode[][] = [[], [], [], [], []];

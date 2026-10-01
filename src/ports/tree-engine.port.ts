@@ -5,4 +5,5 @@ export interface TreeEnginePort {
   water(tree: CounterfactualTree, nodeId: string): CounterfactualTree;
   prune(tree: CounterfactualTree, nodeId: string): CounterfactualTree;
   harvest(tree: CounterfactualTree, nodeId: string): LifeSpecimen;
+  removeSpecimen(tree: CounterfactualTree, specimenId: string): CounterfactualTree;
 }

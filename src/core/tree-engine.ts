@@ -14,7 +14,12 @@ const CATEGORY_MAP: Record<LifeCategory, { name: string; color: string }> = {
   twist: { name: '奇点与宿命', color: '#8b80b6' }
 };
 
-export function buildCounterfactualTree(assumption: string): CounterfactualTree {
+export function buildCounterfactualTree(rawAssumption: string): CounterfactualTree {
+  const assumption = (rawAssumption ?? '').trim();
+  if (!assumption) {
+    throw new Error('假设内容不能为空，无法生长反事实树');
+  }
+
   const seed = [...assumption].reduce((sum, c) => sum + c.charCodeAt(0), 0);
   const nodes: Record<string, LifeNode> = {};
   const rootId = 'node-root';
@@ -225,4 +230,12 @@ export function harvestSpecimen(tree: CounterfactualTree, nodeId: string): LifeS
 
   tree.specimens.push(specimen);
   return specimen;
+}
+
+export function removeSpecimen(tree: CounterfactualTree, specimenId: string): CounterfactualTree {
+  const nextSpecimens = tree.specimens.filter(s => s.id !== specimenId);
+  if (nextSpecimens.length === tree.specimens.length) {
+    return tree;
+  }
+  return { ...tree, specimens: nextSpecimens };
 }
