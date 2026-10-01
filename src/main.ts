@@ -20,7 +20,11 @@ let isCabinetOpen = false;
 const rootEl = document.getElementById('app')!;
 
 function refreshView() {
-  const specimens = specimenAdapter.getAll();
+  // 展柜仅陈列与当前树同一假设下采集的标本，
+  // 保证标题、节点与展柜始终来自同一棵树（其余假设的标本仍保留在存储中）
+  const specimens = specimenAdapter
+    .getAll()
+    .filter(s => s.assumption === currentTree.assumption);
 
   renderTreeApp(
     rootEl,
@@ -30,8 +34,16 @@ function refreshView() {
     PRESETS,
     {
       onGrowNewTree: (assumption: string) => {
-        currentTree = treeAdapter.createTree(assumption);
-        refreshView();
+        try {
+          // 先完整生长新树，成功后再提交切换；失败则保留原树
+          const nextTree = treeAdapter.createTree(assumption);
+          currentTree = nextTree;
+          refreshView();
+        } catch (err) {
+          console.error('生长反事实树失败，已保留原树：', err);
+          refreshView();
+          alert('新假设演化失败，已保留当前反事实树。');
+        }
       },
       onWaterNode: (nodeId: string) => {
         currentTree = treeAdapter.water(currentTree, nodeId);

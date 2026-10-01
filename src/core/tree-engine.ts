@@ -15,7 +15,11 @@ const CATEGORY_MAP: Record<LifeCategory, { name: string; color: string }> = {
 };
 
 export function buildCounterfactualTree(assumption: string): CounterfactualTree {
-  const seed = [...assumption].reduce((sum, c) => sum + c.charCodeAt(0), 0);
+  const normalized = assumption.trim();
+  if (!normalized) {
+    throw new Error('假设不能为空，无法生长反事实树');
+  }
+  const seed = [...normalized].reduce((sum, c) => sum + c.charCodeAt(0), 0);
   const nodes: Record<string, LifeNode> = {};
   const rootId = 'node-root';
 
@@ -23,7 +27,7 @@ export function buildCounterfactualTree(assumption: string): CounterfactualTree 
     id: rootId,
     layerIndex: 0,
     eraLabel: ERA_LABELS[0],
-    title: `假设原点：${assumption}`,
+    title: `假设原点：${normalized}`,
     scenarioDescription: '如果时间倒流至那个关键的岔路口，世界在一毫秒的迟疑中，分化为两条平行奔流的因果之河。',
     vitality: 100,
     isPruned: false,
@@ -143,7 +147,7 @@ export function buildCounterfactualTree(assumption: string): CounterfactualTree 
 
   return {
     id: `tree-${Date.now()}`,
-    assumption,
+    assumption: normalized,
     rootId,
     nodes,
     createdAt: new Date().toLocaleDateString('zh-CN'),
